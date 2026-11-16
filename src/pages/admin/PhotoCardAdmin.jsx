@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase, uploadImage } from '../../lib/supabase'
 import { useSite } from '../../lib/store'
 import { Select, useConfirm } from '../../components/Ui'
-import { LAYERS, SHAPES, detectHole, packDesign } from '../../lib/photocard'
+import { ALIGNS, LAYERS, SHAPES, detectHole, packDesign } from '../../lib/photocard'
 
 const bn = (n) => Number(n || 0).toLocaleString('bn-BD')
-const BLANK = { title_bn: '', image_url: '', width: 1080, height: 1080, shape: 'rect', layer: 'under', px: 0.2, py: 0.2, pw: 0.6, ph: 0.6, published: true, sort: 0 }
+const BLANK = { title_bn: '', image_url: '', width: 1080, height: 1080, shape: 'rect', layer: 'under', px: 0.2, py: 0.2, pw: 0.6, ph: 0.6, name_on: false, nx: 0.1, ny: 0.85, nw: 0.8, nh: 0.08, name_color: '#b30000', name_align: 'center', name_bold: true, published: true, sort: 0 }
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v))
 const chess = 'repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0/16px 16px'
 
@@ -13,28 +13,35 @@ const chess = 'repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0/16px 16px'
 function BoxEditor({ t, set }) {
   const ref = useRef(null)
   const drag = useRef(null)
-  const num = { px: Number(t.px), py: Number(t.py), pw: Number(t.pw), ph: Number(t.ph) }
-  function start(e, mode) {
+  const g = (k) => Number(t[k])
+  function start(e, mode, pre) {
     e.preventDefault(); e.stopPropagation()
     e.currentTarget.setPointerCapture?.(e.pointerId)
-    drag.current = { mode, x: e.clientX, y: e.clientY, ...num }
+    const k = pre === 'p' ? ['px', 'py', 'pw', 'ph'] : ['nx', 'ny', 'nw', 'nh']
+    drag.current = { mode, k, x: e.clientX, y: e.clientY, v: k.map(g) }
   }
   function move(e) {
     const d = drag.current
     if (!d) return
     const r = ref.current.getBoundingClientRect()
     const dx = (e.clientX - d.x) / r.width, dy = (e.clientY - d.y) / r.height
-    if (d.mode === 'move') set({ px: clamp(d.px + dx, 0, 1 - d.pw), py: clamp(d.py + dy, 0, 1 - d.ph) })
-    else set({ pw: clamp(d.pw + dx, 0.05, 1 - d.px), ph: clamp(d.ph + dy, 0.05, 1 - d.py) })
+    const [x, y, w, h] = d.v, [kx, ky, kw, kh] = d.k
+    if (d.mode === 'move') set({ [kx]: clamp(x + dx, 0, 1 - w), [ky]: clamp(y + dy, 0, 1 - h) })
+    else set({ [kw]: clamp(w + dx, 0.03, 1 - x), [kh]: clamp(h + dy, 0.02, 1 - y) })
   }
   const end = () => { drag.current = null }
   const radius = t.shape === 'circle' ? '50%' : t.shape === 'round' ? '12%' : 0
+  const box = (pre, color, bg, rad, label) => (
+    <div onPointerDown={(e) => start(e, 'move', pre)} style={{ position: 'absolute', left: `${g(pre + 'x') * 100}%`, top: `${g(pre + 'y') * 100}%`, width: `${g(pre + 'w') * 100}%`, height: `${g(pre + 'h') * 100}%`, border: `2px dashed ${color}`, background: bg, borderRadius: rad, cursor: 'move', boxSizing: 'border-box', display: 'grid', placeItems: 'center', lineHeight: 1.2, fontSize: 12, color: '#000', fontWeight: 700, overflow: 'hidden' }}>
+      {label}
+      <span onPointerDown={(e) => start(e, 'size', pre)} style={{ position: 'absolute', right: -9, bottom: -9, width: 22, height: 22, borderRadius: 11, background: color, border: '2px solid #fff', cursor: 'nwse-resize' }} />
+    </div>
+  )
   return (
     <div ref={ref} style={{ position: 'relative', width: '100%', maxWidth: 460, margin: '0 auto', background: chess, lineHeight: 0, touchAction: 'none', userSelect: 'none' }} onPointerMove={move} onPointerUp={end} onPointerCancel={end}>
       <img src={t.image_url} alt="" draggable={false} style={{ width: '100%', display: 'block', pointerEvents: 'none' }} />
-      <div onPointerDown={(e) => start(e, 'move')} style={{ position: 'absolute', left: `${num.px * 100}%`, top: `${num.py * 100}%`, width: `${num.pw * 100}%`, height: `${num.ph * 100}%`, border: '2px dashed #e5007d', background: 'rgba(229,0,125,.18)', borderRadius: radius, cursor: 'move', boxSizing: 'border-box' }}>
-        <span onPointerDown={(e) => start(e, 'size')} style={{ position: 'absolute', right: -9, bottom: -9, width: 22, height: 22, borderRadius: 11, background: '#e5007d', border: '2px solid #fff', cursor: 'nwse-resize' }} />
-      </div>
+      {box('p', '#e5007d', 'rgba(229,0,125,.18)', radius, '')}
+      {t.name_on && box('n', '#0b6bcb', 'rgba(11,107,203,.22)', 4, 'নাম')}
     </div>
   )
 }
@@ -62,7 +69,7 @@ function Editor({ init, onDone }) {
   async function save() {
     if (!t.image_url) return setMsg('আগে ডিজাইনের ছবি আপলোড করুন।')
     setBusy(true); setMsg('')
-    const row = { title_bn: t.title_bn || '', image_url: t.image_url, width: t.width, height: t.height, shape: t.shape, layer: t.layer, px: Number(t.px), py: Number(t.py), pw: Number(t.pw), ph: Number(t.ph), published: !!t.published, sort: Number(t.sort) || 0 }
+    const row = { title_bn: t.title_bn || '', image_url: t.image_url, width: t.width, height: t.height, shape: t.shape, layer: t.layer, px: Number(t.px), py: Number(t.py), pw: Number(t.pw), ph: Number(t.ph), name_on: !!t.name_on, nx: Number(t.nx), ny: Number(t.ny), nw: Number(t.nw), nh: Number(t.nh), name_color: t.name_color || '#b30000', name_align: t.name_align || 'center', name_bold: t.name_bold !== false, published: !!t.published, sort: Number(t.sort) || 0 }
     const q = t.id ? supabase.from('photocard_templates').update(row).eq('id', t.id) : supabase.from('photocard_templates').insert(row)
     const { error } = await q
     setBusy(false)
@@ -92,6 +99,22 @@ function Editor({ init, onDone }) {
               <div className="field" key={k}><label>{l}</label><input type="number" min="0" max="100" step="0.5" value={pct(k)} onChange={(e) => set({ [k]: clamp(Number(e.target.value) / 100, 0, 1) })} /></div>
             ))}
           </div>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input type="checkbox" checked={!!t.name_on} onChange={(e) => set({ name_on: e.target.checked })} /> ব্যবহারকারী নিজের নাম লিখতে পারবে (নামের জায়গা দেখান)</label>
+          {t.name_on && (
+            <>
+              <p className="muted" style={{ margin: 0 }}>নীল "নাম" বক্সটি টেনে সরান; কোণার বিন্দু টেনে মাপ বদলান। নাম বড় হলে অক্ষর নিজে থেকে ছোট হয়ে বক্সে ধরে যাবে।</p>
+              <div className="grid g3">
+                <div className="field"><label>নামের রঙ</label><input type="color" value={t.name_color || '#b30000'} onChange={(e) => set({ name_color: e.target.value })} style={{ height: 40, width: '100%' }} /></div>
+                <div className="field"><label>নাম কোন দিকে</label><Select value={t.name_align || 'center'} onChange={(v) => set({ name_align: v })} options={ALIGNS} /></div>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center', alignSelf: 'end' }}><input type="checkbox" checked={t.name_bold !== false} onChange={(e) => set({ name_bold: e.target.checked })} /> মোটা অক্ষর</label>
+              </div>
+              <div className="grid g3">
+                {[['nx', 'বাম থেকে %'], ['ny', 'ওপর থেকে %'], ['nw', 'চওড়া %'], ['nh', 'উচ্চতা %']].map(([k, l]) => (
+                  <div className="field" key={k}><label>{l}</label><input type="number" min="0" max="100" step="0.5" value={pct(k)} onChange={(e) => set({ [k]: clamp(Number(e.target.value) / 100, 0, 1) })} /></div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
       <div className="grid g2">
