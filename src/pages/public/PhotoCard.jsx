@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useSite } from '../../lib/store'
 import PageHead from '../../components/PageHead'
-import { clampTf, drawCard, loadImage, loadUserPhoto } from '../../lib/photocard'
+import { NAME_FONT, clampTf, drawCard, loadImage, loadUserPhoto } from '../../lib/photocard'
 
 const ymd = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
@@ -15,6 +15,8 @@ export default function PhotoCard() {
   const [frame, setFrame] = useState(null)
   const [photo, setPhoto] = useState(null)
   const [tf, setTf] = useState({ z: 1, fx: 0, fy: 0 })
+  const [name, setName] = useState('')
+  const [fontOk, setFontOk] = useState(0)
   const [err, setErr] = useState('')
   const [out, setOut] = useState('')
   const cv = useRef(null)
@@ -28,7 +30,9 @@ export default function PhotoCard() {
   }, [])
   const tpl = useMemo(() => (tpls || []).find((x) => x.id === sel), [tpls, sel])
   const num = (x) => Number(x)
-  const T = useMemo(() => (tpl ? { ...tpl, px: num(tpl.px), py: num(tpl.py), pw: num(tpl.pw), ph: num(tpl.ph) } : null), [tpl])
+  const T = useMemo(() => (tpl ? { ...tpl, px: num(tpl.px), py: num(tpl.py), pw: num(tpl.pw), ph: num(tpl.ph), nx: num(tpl.nx), ny: num(tpl.ny), nw: num(tpl.nw), nh: num(tpl.nh) } : null), [tpl])
+  // নামের ফন্ট ক্যানভাসে ব্যবহারের আগে লোড করা
+  useEffect(() => { if (!name || !document.fonts?.load) return; document.fonts.load(`700 40px ${NAME_FONT}`, name).then(() => setFontOk((n) => n + 1), () => {}) }, [name])
 
   useEffect(() => {
     setFrame(null)
@@ -42,8 +46,8 @@ export default function PhotoCard() {
     const c = cv.current
     if (!c || !T || !frame) return
     c.width = T.width; c.height = T.height
-    drawCard(c.getContext('2d'), T.width, T.height, T, frame, photo, tf)
-  }, [T, frame, photo, tf])
+    drawCard(c.getContext('2d'), T.width, T.height, T, frame, photo, tf, name)
+  }, [T, frame, photo, tf, name, fontOk])
   useEffect(() => { render() }, [render])
 
   async function pickFile(e) {
@@ -129,6 +133,12 @@ export default function PhotoCard() {
                   </label>
                   <span className="muted" style={{ fontSize: '.88rem' }}>{t('pc.privacy')}</span>
                 </div>
+                {T?.name_on && (
+                  <label style={{ display: 'grid', gap: 4, maxWidth: 520, width: '100%' }}>
+                    <span>{t('pc.name')}</span>
+                    <input value={name} maxLength={40} placeholder={t('pc.name.ph')} onChange={(e) => { setName(e.target.value); setOut('') }} />
+                  </label>
+                )}
                 {err && <div className="alert err">{err}</div>}
                 <div style={{ display: 'grid', placeItems: 'center' }}>
                   <canvas

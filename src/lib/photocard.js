@@ -52,7 +52,28 @@ function boxPath(ctx, x, y, w, h, shape) {
   } else ctx.rect(x, y, w, h)
 }
 
-export function drawCard(ctx, W, H, tpl, frame, photo, tfIn) {
+export const ALIGNS = [['left', 'বাম'], ['center', 'মাঝখানে'], ['right', 'ডান']]
+export const NAME_FONT = '"Noto Serif Bengali", serif'
+
+// নামের বক্সে নাম বসানো: বক্সে না ধরলে অক্ষর নিজে থেকে ছোট হয়
+function drawName(ctx, W, H, tpl, name) {
+  const txt = (name || '').trim()
+  if (!tpl.name_on || !txt) return
+  const bx = tpl.nx * W, by = tpl.ny * H, bw = tpl.nw * W, bh = tpl.nh * H
+  const wt = tpl.name_bold === false ? 400 : 700
+  let size = bh * 0.78
+  ctx.font = `${wt} ${size}px ${NAME_FONT}`
+  const w = ctx.measureText(txt).width
+  if (w > bw) { size = size * bw / w; ctx.font = `${wt} ${size}px ${NAME_FONT}` }
+  const al = tpl.name_align || 'center'
+  ctx.fillStyle = tpl.name_color || '#b30000'
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = al
+  const x = al === 'left' ? bx : al === 'right' ? bx + bw : bx + bw / 2
+  ctx.fillText(txt, x, by + bh / 2)
+}
+
+export function drawCard(ctx, W, H, tpl, frame, photo, tfIn, name) {
   ctx.clearRect(0, 0, W, H)
   const drawPhoto = () => {
     if (!photo) return
@@ -68,6 +89,7 @@ export function drawCard(ctx, W, H, tpl, frame, photo, tfIn) {
     ctx.restore()
   }
   if (tpl.layer === 'over') { if (frame) ctx.drawImage(frame, 0, 0, W, H); drawPhoto() } else { drawPhoto(); if (frame) ctx.drawImage(frame, 0, 0, W, H) }
+  drawName(ctx, W, H, tpl, name)
 }
 
 // স্বচ্ছ (ফাঁকা) জায়গার সীমানা খুঁজে বক্সের মাপ আন্দাজ করা; না পেলে null

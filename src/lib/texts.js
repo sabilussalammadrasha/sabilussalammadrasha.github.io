@@ -149,6 +149,8 @@ export const TEXT_GROUPS = [
       ['pc.change', 'অন্য ছবি দিন', '', 'Change photo'],
       ['pc.zoom', 'ছবি বড়-ছোট', '', 'Zoom'],
       ['pc.hint', 'ছবিটি আঙুল বা মাউস দিয়ে টেনে সরান; দুই আঙুলে বড়-ছোট করুন।', '', 'Drag the photo to move it; pinch to zoom.'],
+      ['pc.name', 'আপনার নাম', '', 'Your name'],
+      ['pc.name.ph', 'এখানে নাম লিখুন', '', 'Type your name'],
       ['pc.download', 'ডাউনলোড করুন', '', 'Download'],
       ['pc.share', 'শেয়ার করুন', '', 'Share'],
       ['pc.saveHint', 'ডাউনলোড না হলে নিচের ছবিটি চেপে ধরে “ছবি সংরক্ষণ” করুন। ফেসবুক/মেসেঞ্জার থেকে খুললে ক্রোম ব্রাউজারে খুলুন।', '', 'If the download does not start, press and hold the image below to save it. Open in Chrome if you came from Facebook or Messenger.'],
