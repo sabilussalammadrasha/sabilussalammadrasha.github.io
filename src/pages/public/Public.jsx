@@ -422,7 +422,7 @@ export function Contact() {
           <div className="stack">
             <p>{t('contact.intro')}</p>
             <div className="card">
-              <p><b><Icon name="pin" size={18} /> {t('contact.address.label')}</b><br />{t('site.address')}</p>
+              <p><b><Icon name="pin" size={18} /> {t('contact.address.label')}</b><br />{settings.map_link ? <a href={settings.map_link} target="_blank" rel="noreferrer">{t('site.address')}</a> : t('site.address')}</p>
               {settings.phone && <p><b><Icon name="phone" size={18} /> {t('contact.phone.label')}</b><br /><a href={`tel:${settings.phone}`}>{settings.phone}</a></p>}
               {settings.email && <p><b><Icon name="mail" size={18} /> {t('contact.email.label')}</b><br /><a href={`mailto:${settings.email}`}>{settings.email}</a></p>}
               {settings.whatsapp && <p><b><Icon name="whatsapp" size={18} /> WhatsApp</b><br /><a href={socialHref('whatsapp', settings.whatsapp)} target="_blank" rel="noreferrer">{settings.whatsapp}</a></p>}

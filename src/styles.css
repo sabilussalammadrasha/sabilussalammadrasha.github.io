@@ -195,8 +195,9 @@ main.page-in { animation: pageIn .5s var(--ease) both; }
 .avatar { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--secondary); color: #fff; font-weight: 700; font-size: .85rem; line-height: 1; }
 .avatar.big { width: 64px; height: 64px; font-size: 1.6rem; flex: none; }
 @media (max-width: 640px) {
-  .top-login span { display: none; }
-  .top-login { padding: 3px; }
+  .top-login > span:not(.icn) { display: none; }
+  .top-login { width: 28px; height: 28px; padding: 0; justify-content: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .12); }
+  .top-login:hover { text-decoration: none; background: rgba(255, 255, 255, .26); }
   .langs button { padding: 3px 8px; }
   .topbar { font-size: .8rem; }
 }
@@ -666,7 +667,7 @@ details.rules > summary h3 { flex: 1; }
 .form .check span { line-height: 1.5; }
 .lead { max-width: 680px; margin-inline: auto; }
 .top-signup { white-space: nowrap; }
-@media (max-width: 420px) { .top-login span { display: none; } }
+@media (max-width: 420px) { .top-login > span:not(.icn) { display: none; } }
 
 :root[data-theme='dark'] .header .brand img { background: #fff; border-radius: 50%; padding: 2px; }
 .sel-pop { z-index: 400; }
@@ -929,3 +930,12 @@ html[lang='en'] .apply-title { font-size: 1rem; }
 
 /* সাইটের তথ্য আসার আগে ফাঁকা পর্দা (ডিফল্ট ভার্সন এক ঝলক দেখানো বন্ধ) */
 .boot { min-height: 100vh; }
+
+/* হোমের জরুরি নোটিশে শিরোনামের নিচে ২ লাইনের বিবরণ */
+.u-item { flex-wrap: wrap; gap: 3px 10px; align-items: flex-start; }
+.u-head { display: flex; gap: 10px; align-items: baseline; min-width: 0; flex-basis: 100%; }
+.u-head b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; min-width: 0; }
+.u-head small { color: var(--muted); white-space: nowrap; }
+.u-body { flex-basis: 100%; color: var(--muted); font-size: .92rem; line-height: 1.5; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* উপরে যান বোতাম যেন ফুটারের ডেভেলপার বার ঢেকে না ফেলে */
+.footer { padding-bottom: 72px; }

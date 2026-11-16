@@ -207,13 +207,14 @@ function Urgent({ notices }) {
   }, [n])
   if (!n) return null
   const cur = notices[i % n]
+  const hasBody = notices.some((x) => (pick(x, 'body', lang) || '').trim())
   return (
     <div className="container urgent-wrap">
       <div className="urgent">
         <span className="u-label"><Icon name="bell" size={18} cls="cur" /> {t('urgent.title')}</span>
         <Link to="/notices" className="u-item" key={cur.id}>
-          <small>{fmtDate(cur.date, lang)}</small>
-          <b>{pick(cur, 'title', lang)}</b>
+          <span className="u-head"><small>{fmtDate(cur.date, lang)}</small><b>{pick(cur, 'title', lang)}</b></span>
+          {hasBody && <span className="u-body">{pick(cur, 'body', lang)}</span>}
         </Link>
         <Link to="/notices" className="u-more">{n > 1 ? `${dig(i % n + 1, lang)}/${dig(n, lang)} · ` : ''}{t('common.viewAll')} <Icon name="arrowright" size={15} cls="cur" /></Link>
       </div>
@@ -223,6 +224,7 @@ function Urgent({ notices }) {
 
 export function Home() {
   const { t, lang, settings } = useSite()
+  const AddrTag = settings.map_link ? 'a' : 'div'
   const notices = useRows('notices', { order: 'date', limit: 30 })
   const events = useRows('events', { order: 'event_date', asc: true })
   const gallery = useRows('gallery', { order: 'sort', asc: true, limit: 12 })
@@ -360,7 +362,7 @@ export function Home() {
         <div className="container">
           <SecTitle>{t('contact.cards.title')}</SecTitle>
           <div className="grid g3" style={{ marginTop: 22 }}>
-            <div className="card contact-card"><div className="ico"><Icon name="pin" size={28} /></div><h3>{t('contact.address.label')}</h3><p className="muted" style={{ margin: 0 }}>{t('site.address')}</p></div>
+            <AddrTag className="card contact-card" {...(settings.map_link ? { href: settings.map_link, target: '_blank', rel: 'noreferrer' } : {})}><div className="ico"><Icon name="pin" size={28} /></div><h3>{t('contact.address.label')}</h3><p className="muted" style={{ margin: 0 }}>{t('site.address')}</p></AddrTag>
             {settings.phone && <a className="card contact-card" href={`tel:${settings.phone}`}><div className="ico"><Icon name="phone" size={28} /></div><h3>{t('contact.phone.label')}</h3><p className="muted" style={{ margin: 0 }}>{settings.phone}</p></a>}
             {settings.email && <a className="card contact-card" href={`mailto:${settings.email}`}><div className="ico"><Icon name="mail" size={28} /></div><h3>{t('contact.email.label')}</h3><p className="muted" style={{ margin: 0 }}>{settings.email}</p></a>}
           </div>
