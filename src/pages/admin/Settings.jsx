@@ -181,6 +181,11 @@ export default function Settings() {
             </div>
             <div className="field"><label>আরও সোশ্যাল আইকন (ফুটারে দেখাবে)</label><SocialList value={v.socials} onChange={(x) => put('socials', x)} /></div>
             <div className="field">
+              <label>গুগল ম্যাপ লোকেশন লিংক (ঠিকানায় ক্লিক করলে খুলবে)</label>
+              <input placeholder="https://maps.app.goo.gl/…" value={v.map_link || ''} onChange={set('map_link')} />
+              <span className="muted" style={{ fontSize: '.85rem' }}>Google Maps → Share → Copy link থেকে লিংকটি বসান। খালি রাখলে ঠিকানা সাধারণ লেখাই থাকবে।</span>
+            </div>
+            <div className="field">
               <label>গুগল ম্যাপ এম্বেড লিংক</label>
               <input placeholder="https://www.google.com/maps/embed?pb=…" value={v.map_embed || ''} onChange={set('map_embed')} />
               <span className="muted" style={{ fontSize: '.85rem' }}>Google Maps → Share → Embed a map থেকে শুধু src="…" এর ভেতরের লিংকটি বসান।</span>
