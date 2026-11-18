@@ -27,6 +27,7 @@ import Savings from './pages/admin/Savings'
 import Holidays from './pages/admin/Holidays'
 import Reminders from './pages/admin/Reminders'
 import PhotoCard from './pages/public/PhotoCard'
+import BusInfo from './pages/public/BusInfo'
 import PopupAdmin from './pages/admin/PopupAdmin'
 import PhotoCardAdmin from './pages/admin/PhotoCardAdmin'
 import Branches from './pages/admin/Branches'
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="result" element={<Result />} />
         <Route path="verify/:code" element={<Verify />} />
         <Route path="photocard" element={<PhotoCard />} />
+        <Route path="bus" element={<BusInfo />} />
         <Route path="account" element={<Account />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
