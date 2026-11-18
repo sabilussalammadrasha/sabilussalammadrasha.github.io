@@ -9,6 +9,7 @@ const LINKS = {
   sms: ['/admin/integrations', 'এসএমএস গেটওয়ের তথ্য বসান'],
   online_payment: ['/admin/integrations', 'পেমেন্ট গেটওয়ের তথ্য বসান'],
   photocard: ['/admin/photocard', 'ফটোকার্ডের ডিজাইন খুলুন'],
+  parent_portal: ['/admin/parent-links', 'অভিভাবক সংযোগ পাতা খুলুন'],
   multi_branch: ['/admin/branches', 'শাখা পেজ খুলুন'],
   events: ['/admin/events', 'ইভেন্ট ক্যালেন্ডার খুলুন'],
   website: ['/admin/texts', 'ওয়েবসাইটের লেখা সম্পাদনা করুন'],
