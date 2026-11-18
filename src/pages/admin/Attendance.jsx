@@ -11,6 +11,7 @@ import { Select, useConfirm } from '../../components/Ui'
 import Icon from '../../components/Icon'
 import { downloadCsv } from './Crud'
 import { useHolidays } from '../../lib/holidays'
+import AttendanceMarks from './AttendanceMarks'
 
 const ST = [['present', 'উপস্থিত', 'p'], ['absent', 'অনুপস্থিত', 'a'], ['late', 'দেরি', 'l'], ['leave', 'ছুটি', 'v']]
 const ST_L = Object.fromEntries(ST.map(([k, l]) => [k, l]))
@@ -278,15 +279,16 @@ export default function Attendance() {
     <>
       <h2>হাজিরা</h2>
       <div className="tabs" style={{ marginBottom: 10 }}>
-        {[['take', 'হাজিরা নিন'], ['report', 'মাসিক রিপোর্ট'], ['device', 'মেশিন (ZKTeco)']].map(([k, l]) => <button type="button" key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
+        {[['take', 'হাজিরা নিন'], ['report', 'মাসিক রিপোর্ট'], ['marks', 'উপস্থিতি নম্বর'], ['device', 'মেশিন (ZKTeco)']].map(([k, l]) => <button type="button" key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
       </div>
-      {tab !== 'device' && (
+      {tab !== 'device' && tab !== 'marks' && (
         <div className="tabs" style={{ marginBottom: 14 }}>
           {[['student', 'ছাত্র-ছাত্রী'], ['staff', 'শিক্ষক ও কর্মচারী']].map(([k, l]) => <button type="button" key={k} className={type === k ? 'on' : ''} onClick={() => setType(k)}>{l}</button>)}
         </div>
       )}
       {tab === 'take' && <Take key={type} type={type} sessions={sessions} classes={classes} />}
       {tab === 'report' && <Report key={type} type={type} sessions={sessions} classes={classes} />}
+      {tab === 'marks' && <AttendanceMarks />}
       {tab === 'device' && <Device />}
     </>
   )

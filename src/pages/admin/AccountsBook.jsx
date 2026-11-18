@@ -4,7 +4,7 @@ import { fetchAll } from '../../lib/db'
 import { useSite } from '../../lib/store'
 import { Modal, Select } from '../../components/Ui'
 import { downloadCsv } from './Crud'
-import { dateBn, nm, num, taka, todayStr, addDays, printNode, printedAt } from './fin'
+import { dateBn, nm, num, taka, takaWords, todayStr, addDays, printNode, printedAt } from './fin'
 
 const bn = (n) => Number(n || 0).toLocaleString('bn-BD')
 const METHOD = { cash: 'নগদ', bank: 'ব্যাংক', bkash: 'বিকাশ', nagad: 'নগদ (মোবাইল)', mobile: 'মোবাইল ব্যাংকিং' }
@@ -66,6 +66,7 @@ function VoucherView({ e, onClose }) {
             <tr><td style={{ ...td, background: '#f4f4f4' }}>বিবরণ</td><td style={{ ...td, height: 46, verticalAlign: 'top' }}>{e.note}</td></tr>
             <tr><td style={{ ...td, background: '#f4f4f4' }}>পরিশোধের মাধ্যম</td><td style={td}>{mt(e.method)}</td></tr>
             <tr><td style={{ ...td, background: '#f4f4f4' }}><b>টাকার পরিমাণ</b></td><td style={{ ...td, fontSize: '1.15rem' }}><b>{taka(e.amount)}</b></td></tr>
+            <tr><td style={{ ...td, background: '#f4f4f4' }}>কথায়</td><td style={td}>{takaWords(e.amount)}</td></tr>
           </tbody>
         </table>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 56, gap: 8, fontSize: '.9rem' }}>

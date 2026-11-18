@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { fetchAll } from '../../lib/db'
-import { Select } from '../../components/Ui'
+import { Select, Switch } from '../../components/Ui'
 import Crud from './Crud'
 import { nm, taka, printNode } from './fin'
 import { useClassList } from './Exams'
@@ -9,6 +9,28 @@ import { useClassList } from './Exams'
 const bnum = (n) => Number(n || 0).toLocaleString('bn-BD')
 const byNo = (a, b) => String(a.student_no || '').localeCompare(String(b.student_no || ''), undefined, { numeric: true })
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : '')
+
+// অভিভাবকের জন্য বাসের তথ্য: চালু/বন্ধ ও অভিভাবকদের উদ্দেশে বার্তা
+function ParentBus() {
+  const [v, setV] = useState({ enabled: false, notice: '' })
+  const [msg, setMsg] = useState('')
+  useEffect(() => { supabase.from('site_settings').select('value').eq('key', 'bus_public').maybeSingle().then(({ data }) => setV((x) => ({ ...x, ...(data?.value || {}) }))) }, [])
+  async function save(next) {
+    const { error } = await supabase.from('site_settings').upsert({ key: 'bus_public', value: next, updated_at: new Date().toISOString() })
+    setMsg(error ? `সংরক্ষণ হয়নি: ${error.message}` : 'সংরক্ষিত হয়েছে।')
+  }
+  const link = `${window.location.origin}${window.location.pathname}#/bus`
+  return (
+    <div className="card form">
+      <p className="muted" style={{ marginTop: 0 }}>চালু করলে অভিভাবক নিচের লিংকে শিক্ষার্থীর আইডি ও জন্মতারিখ দিয়ে বাসের নাম, গাড়ির নম্বর, চালকের নাম ও ফোন, মাসিক ভাড়া এবং (দেওয়া থাকলে) লাইভ ট্র্যাকিং লিংক দেখতে পারবেন। ফলাফল দেখার মতোই আইডি ও জন্মতারিখ না মিললে কিছু দেখা যায় না।</p>
+      <label style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}><Switch checked={!!v.enabled} onChange={(on) => { const n = { ...v, enabled: on }; setV(n); save(n) }} /> অভিভাবকদের বাসের তথ্য দেখার পাতা {v.enabled ? 'চালু' : 'বন্ধ'}</label>
+      <div className="field"><label>অভিভাবকদের জন্য বার্তা (ঐচ্ছিক, তথ্যের নিচে দেখাবে)</label><textarea rows={3} value={v.notice || ''} onChange={(e) => setV({ ...v, notice: e.target.value })} placeholder="যেমন: বাস সকাল ৭টায় ছাড়বে। বৃষ্টির দিনে সময় বদলাতে পারে।" /></div>
+      <button className="btn small" onClick={() => save(v)}>বার্তা সংরক্ষণ</button>
+      <div className="field" style={{ marginTop: 14 }}><label>অভিভাবকদের জন্য লিংক (এটি শেয়ার করুন বা নোটিশের বাটনে দিন)</label><input readOnly value={link} onFocus={(e) => e.target.select()} /></div>
+      {msg && <div className={`alert ${/হয়নি/.test(msg) ? 'err' : 'ok'}`}>{msg}</div>}
+    </div>
+  )
+}
 
 // ট্রান্সপোর্ট: বাস/রুট তৈরি, শিক্ষার্থী বরাদ্দ, রুটভিত্তিক তালিকা, লাইভ ট্র্যাকিং লিংক
 export default function Transport() {
@@ -67,6 +89,7 @@ export default function Transport() {
         <button className={tab === 'alloc' ? 'on' : ''} onClick={() => setTab('alloc')}>শিক্ষার্থী বরাদ্দ</button>
         <button className={tab === 'routes' ? 'on' : ''} onClick={() => setTab('routes')}>বাস / রুট</button>
         <button className={tab === 'list' ? 'on' : ''} onClick={() => setTab('list')}>তালিকা প্রিন্ট</button>
+        <button className={tab === 'parent' ? 'on' : ''} onClick={() => setTab('parent')}>অভিভাবকের জন্য</button>
       </div>
       {msg && <div className={`alert ${/হয়নি|পূর্ণ/.test(msg) ? 'err' : 'ok'}`} style={{ marginBottom: 12 }}>{msg}</div>}
 
@@ -134,6 +157,8 @@ export default function Transport() {
           </>
         )
       )}
+
+      {tab === 'parent' && <ParentBus />}
 
       {tab === 'list' && (
         <>

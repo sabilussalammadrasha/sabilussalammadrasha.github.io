@@ -20,6 +20,19 @@ export default function LateFee() {
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [open, setOpen] = useState(false)
+  const [auto, setAuto] = useState(null)
+  const [abusy, setAbusy] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    supabase.rpc('auto_late_status').then(({ data, error }) => setAuto(error ? { available: false, error: error.message } : data))
+  }, [open])
+  async function toggleAuto(on) {
+    setAbusy(true); setMsg('')
+    const { data, error } = await supabase.rpc('set_auto_late', { p_on: on })
+    setAbusy(false)
+    if (error) return setMsg(`ত্রুটি: ${error.message}`)
+    setAuto(data)
+  }
 
   useEffect(() => {
     if (!open || !/^\d{4}-\d{2}$/.test(month)) return
@@ -95,6 +108,22 @@ export default function LateFee() {
           </div>
           <p style={{ margin: '4px 0' }}>নির্ধারিত তারিখ: <b>{dateBn(dueDate)}</b> {overdue ? '(পার হয়েছে)' : '(এখনো পার হয়নি)'} · বিলম্ব ফি যোগ হবে: <b>{plan.rows.length.toLocaleString('bn-BD')}</b> জন, মোট <b>{taka(plan.total)}</b>{plan.skipped ? ` · আগে যোগ হয়েছে: ${plan.skipped.toLocaleString('bn-BD')} জন` : ''}</p>
           <button className="btn" disabled={busy || !plan.rows.length || !overdue} onClick={apply}>বিলম্ব ফি যোগ করুন</button>
+          {auto && (
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line, #ddd)' }}>
+              <b>স্বয়ংক্রিয় বিলম্ব ফি</b>
+              {!auto.available ? (
+                <p className="muted" style={{ margin: '6px 0 0' }}>এটা চালু করতে Supabase-এ <b>Database → Extensions</b> থেকে <b>pg_cron</b> চালু করে সর্বশেষ <b>schema.sql</b> আবার চালান, তারপর এই পাতা রিফ্রেশ করুন।{auto.error ? ` (${auto.error})` : ''}</p>
+              ) : (
+                <>
+                  <p className="muted" style={{ margin: '6px 0' }}>চালু থাকলে প্রতিদিন সকাল ৭টায় সিস্টেম দেখবে: চলতি মাসের নির্ধারিত তারিখ পার হয়ে গেছে কি না। পার হলে মাসিক বিল বাকি থাকা সক্রিয় শিক্ষার্থীদের বিলে (ওপরের সেটিং অনুযায়ী) একবার বিলম্ব ফি যোগ হবে। আগে যোগ হলে বাদ যাবে। সেটিং বদলালে "সেটিংস সংরক্ষণ" চাপতে ভুলবেন না।</p>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span>অবস্থা: <b>{auto.on ? 'চালু' : 'বন্ধ'}</b></span>
+                    <button className="btn small" disabled={abusy} onClick={() => toggleAuto(!auto.on)}>{auto.on ? 'বন্ধ করুন' : 'চালু করুন'}</button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           {msg && <div className={`alert ${/ত্রুটি|পার হয়নি/.test(msg) ? 'err' : 'ok'}`} style={{ marginTop: 10 }}>{msg}</div>}
         </>
       )}
