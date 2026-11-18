@@ -3,6 +3,7 @@ export const FEATURES = [
   ['applications', 'inbox', 'ইনবক্স', 'ভর্তির আবেদন', '/admin/applications'],
   ['messages', 'inbox', 'ইনবক্স', 'যোগাযোগের বার্তা', '/admin/messages'],
   ['students', 'people', 'শিক্ষার্থী ও হাজিরা', 'ছাত্র-ছাত্রী', '/admin/students'],
+  ['parent_links', 'people', 'শিক্ষার্থী ও হাজিরা', 'অভিভাবক সংযোগ', '/admin/parent-links'],
   ['classes', 'people', 'শিক্ষার্থী ও হাজিরা', 'শ্রেণি ও হালকা', '/admin/classes'],
   ['staff', 'people', 'শিক্ষার্থী ও হাজিরা', 'শিক্ষক ও কর্মচারী', '/admin/staff'],
   ['import', 'people', 'শিক্ষার্থী ও হাজিরা', 'এক্সেল ইম্পোর্ট', '/admin/import'],
