@@ -19,7 +19,7 @@ function PwField({ label, value, onChange, auto }) {
 }
 
 function Profile() {
-  const { t, lang } = useSite()
+  const { t, lang, modules } = useSite()
   const { session, profile, signOut, isAdmin, changePassword } = useAuth()
   const [pw, setPw] = useState('')
   const [msg, setMsg] = useState('')
@@ -42,6 +42,7 @@ function Profile() {
       </div>
       <div className="acc-status"><small>{t('auth.status')}</small><b>{lang === 'bn' ? ROLE_BN[profile?.role || 'none'] : (profile?.role || 'member').replace('_', ' ')}</b></div>
       {!isAdmin && (!profile || profile.role === 'none') && <div className="alert info pre">{t('auth.status.none')}</div>}
+      {!isAdmin && modules.parent_portal === true && (!profile || ['none', 'parent'].includes(profile.role)) && <button type="button" className="btn" onClick={() => nav('/parent')}><Icon name="users" size={18} cls="cur" /> {t('pp.open')}</button>}
       {isAdmin && <button type="button" className="btn" onClick={() => nav('/admin')}><Icon name="dashboard" size={18} cls="cur" /> {t('auth.admin.btn')}</button>}
       <form className="form" onSubmit={savePw} style={{ marginTop: 18 }}>
         <PwField label={t('auth.pw.change')} value={pw} onChange={setPw} auto="new-password" />
