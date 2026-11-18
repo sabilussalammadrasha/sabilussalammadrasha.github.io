@@ -37,8 +37,9 @@ export default function ParentPortal() {
   useEffect(() => {
     setInfo(null); setRes(null)
     if (!sel) return
+    if (kids?.find((k) => k.id === sel)?.status === 'pending') return
     supabase.rpc('parent_child', { p_student: sel }).then(({ data }) => setInfo(data || null))
-  }, [sel])
+  }, [sel, kids])
 
   async function add(e) {
     e.preventDefault()
@@ -48,7 +49,7 @@ export default function ParentPortal() {
     if (error) return setMsg(error.message)
     if (data?.error) return setMsg(data.error)
     setNo(''); setDob(''); setAdding(false)
-    loadKids(data?.id)
+    await loadKids(data?.id)
   }
   async function unlink(id) {
     if (!window.confirm(`${t('pp.unlink')}?`)) return
@@ -70,6 +71,7 @@ export default function ParentPortal() {
   const f = info?.fees
   const r = info?.bus
   const rr = res && !res.loading ? res : null
+  const pendingKid = kids?.find((k) => k.id === sel && k.status === 'pending')
   return (
     <>
       {head}
@@ -77,7 +79,7 @@ export default function ParentPortal() {
         <div className="container stack" style={{ maxWidth: 860 }}>
           {kids && kids.length > 0 && (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              {kids.map((k) => <button key={k.id} type="button" className={`btn small ${sel === k.id && !adding ? '' : 'outline'}`} onClick={() => { setSel(k.id); setAdding(false) }}>{pick(k, 'name', lang)}</button>)}
+              {kids.map((k) => <button key={k.id} type="button" className={`btn small ${sel === k.id && !adding ? '' : 'outline'}`} onClick={() => { setSel(k.id); setAdding(false) }}>{pick(k, 'name', lang)}{k.status === 'pending' ? ` (${t('pp.pending')})` : ''}</button>)}
               <button type="button" className={`btn small ${adding ? '' : 'outline'}`} onClick={() => setAdding(!adding)}>+ {t('pp.add')}</button>
             </div>
           )}
@@ -95,8 +97,15 @@ export default function ParentPortal() {
             </form>
           )}
 
-          {!adding && sel && !info && <div className="muted center">{t('common.loading')}</div>}
-          {!adding && info && (
+          {!adding && pendingKid && (
+            <div className="card stack">
+              <h3 style={{ margin: 0 }}>{pick(pendingKid, 'name', lang)}</h3>
+              <div className="alert info"><b>{t('pp.pending')}</b><br />{t('pp.pending.note')}</div>
+              <div><button type="button" className="btn small outline" onClick={() => unlink(sel)}>{t('pp.unlink')}</button></div>
+            </div>
+          )}
+          {!adding && sel && !pendingKid && !info && <div className="muted center">{t('common.loading')}</div>}
+          {!adding && !pendingKid && info && (
             <>
               <div className="card" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
                 {info.student.photo_url && <img src={info.student.photo_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover' }} />}
