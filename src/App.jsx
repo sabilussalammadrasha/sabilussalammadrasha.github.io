@@ -28,6 +28,8 @@ import Holidays from './pages/admin/Holidays'
 import Reminders from './pages/admin/Reminders'
 import PhotoCard from './pages/public/PhotoCard'
 import BusInfo from './pages/public/BusInfo'
+import ParentPortal from './pages/public/ParentPortal'
+import ParentLinks from './pages/admin/ParentLinks'
 import PopupAdmin from './pages/admin/PopupAdmin'
 import PhotoCardAdmin from './pages/admin/PhotoCardAdmin'
 import Branches from './pages/admin/Branches'
@@ -76,6 +78,7 @@ export default function App() {
         <Route path="verify/:code" element={<Verify />} />
         <Route path="photocard" element={<PhotoCard />} />
         <Route path="bus" element={<BusInfo />} />
+        <Route path="parent" element={<ParentPortal />} />
         <Route path="account" element={<Account />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
@@ -117,6 +120,7 @@ export default function App() {
         <Route path="transport" element={<Gate mod="transport" name="ট্রান্সপোর্ট ও বাস"><Transport /></Gate>} />
         <Route path="photocard" element={<PhotoCardAdmin />} />
         <Route path="popup" element={<PopupAdmin />} />
+        <Route path="parent-links" element={<Gate mod="parent_portal" name="অভিভাবক পোর্টাল"><ParentLinks /></Gate>} />
         <Route path="branches" element={<Gate mod="multi_branch" name="একাধিক শাখা"><Branches /></Gate>} />
         <Route path="boarding" element={<Gate mod="boarding" name="বোর্ডিং ব্যবস্থাপনা"><Boarding /></Gate>} />
         <Route path="certificates" element={<Gate mod="tc_certificate" name="টিসি ও সনদপত্র"><Certificates /></Gate>} />
